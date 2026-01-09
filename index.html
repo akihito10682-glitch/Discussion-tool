@@ -1,0 +1,159 @@
+import { useState } from 'react';
+import { FileText, ArrowRight } from 'lucide-react';
+
+export default function ArgumentTool() {
+  const [result, setResult] = useState('');
+  const [reasoning, setReasoning] = useState('');
+  const [claim, setClaim] = useState('');
+  const [output, setOutput] = useState('');
+
+  const generateText = () => {
+    if (!result || !reasoning || !claim) {
+      alert('すべての項目を入力してください');
+      return;
+    }
+
+    let text = '';
+    text += result;
+    if (!result.endsWith('。')) text += '。';
+    text += reasoning;
+    if (!reasoning.endsWith('。')) text += '。';
+    text += 'したがって、' + claim;
+    if (!claim.endsWith('。')) text += '。';
+    
+    setOutput(text);
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(output);
+    alert('考察文をコピーしました！');
+  };
+
+  const clearAll = () => {
+    setResult('');
+    setReasoning('');
+    setClaim('');
+    setOutput('');
+  };
+
+  const loadDemo = () => {
+    setResult('試験管Aは青色に変化し、試験管Bは変化しなかった');
+    setReasoning('BTB溶液は酸性で黄色、中性で緑色、アルカリ性で青色を示す性質がある');
+    setClaim('試験管Aの溶液はアルカリ性であることが確認できた');
+    setOutput('');
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <FileText className="w-8 h-8 text-indigo-600" />
+            <h1 className="text-3xl font-bold text-gray-800">考察記入支援ツール</h1>
+          </div>
+          <p className="text-gray-600 mb-8">
+            トゥールミンモデルに基づいて考察文を生成します
+          </p>
+
+          <div className="mb-8">
+            <div className="grid grid-cols-2 gap-8 mb-4">
+              <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6">
+                <label className="block text-lg font-bold text-blue-700 mb-3">
+                  実験結果 (Data)
+                </label>
+                <textarea
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none bg-white"
+                  rows="6"
+                  placeholder="例：試験管Aは青色に変化し、試験管Bは変化しなかった"
+                  value={result}
+                  onChange={(e) => setResult(e.target.value)}
+                />
+              </div>
+
+              <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-6">
+                <label className="block text-lg font-bold text-purple-700 mb-3">
+                  主張 (Claim)
+                </label>
+                <textarea
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none resize-none bg-white"
+                  rows="6"
+                  placeholder="例：試験管Aの溶液はアルカリ性であることが確認できた"
+                  value={claim}
+                  onChange={(e) => setClaim(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* 横向き矢印：実験結果 → 主張 */}
+            <div className="absolute top-1/2 left-0 right-0 flex items-center justify-center pointer-events-none" style={{marginTop: '-60px'}}>
+              <div className="w-full max-w-6xl px-8 flex items-center justify-between">
+                <div className="flex-1"></div>
+                <svg width="80" height="40" className="text-teal-600 mx-4">
+                  <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                      <polygon points="0 0, 10 3, 0 6" fill="currentColor" />
+                    </marker>
+                  </defs>
+                  <line x1="0" y1="20" x2="70" y2="20" stroke="currentColor" strokeWidth="3" markerEnd="url(#arrowhead)" />
+                </svg>
+                <div className="flex-1"></div>
+              </div>
+            </div>
+
+            <div className="w-3/4 mx-auto mt-8">
+              <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6">
+                <label className="block text-lg font-bold text-green-700 mb-3">
+                  論拠 (Warrant)
+                </label>
+                <textarea
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none resize-none bg-white"
+                  rows="4"
+                  placeholder="例：BTB溶液は酸性で黄色、中性で緑色、アルカリ性で青色を示す性質がある"
+                  value={reasoning}
+                  onChange={(e) => setReasoning(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 mt-12">
+            <button
+              onClick={generateText}
+              className="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+            >
+              <ArrowRight className="w-5 h-5" />
+              考察文を生成
+            </button>
+            <button
+              onClick={loadDemo}
+              className="bg-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-600 transition-colors whitespace-nowrap"
+            >
+              デモ文章
+            </button>
+            <button
+              onClick={clearAll}
+              className="bg-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-400 transition-colors whitespace-nowrap"
+            >
+              クリア
+            </button>
+          </div>
+        </div>
+
+        {output && (
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">生成された考察文</h2>
+            <div className="bg-gray-50 p-6 rounded-lg border-2 border-indigo-200 mb-4">
+              <p className="text-gray-800 leading-relaxed text-lg">{output}</p>
+            </div>
+            <button
+              onClick={copyToClipboard}
+              className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+            >
+              📋 考察文をコピー
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
