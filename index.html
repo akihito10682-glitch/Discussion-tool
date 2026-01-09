@@ -1,159 +1,173 @@
-import { useState } from 'react';
-import { FileText, ArrowRight } from 'lucide-react';
-
-export default function ArgumentTool() {
-  const [result, setResult] = useState('');
-  const [reasoning, setReasoning] = useState('');
-  const [claim, setClaim] = useState('');
-  const [output, setOutput] = useState('');
-
-  const generateText = () => {
-    if (!result || !reasoning || !claim) {
-      alert('すべての項目を入力してください');
-      return;
-    }
-
-    let text = '';
-    text += result;
-    if (!result.endsWith('。')) text += '。';
-    text += reasoning;
-    if (!reasoning.endsWith('。')) text += '。';
-    text += 'したがって、' + claim;
-    if (!claim.endsWith('。')) text += '。';
-    
-    setOutput(text);
-  };
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(output);
-    alert('考察文をコピーしました！');
-  };
-
-  const clearAll = () => {
-    setResult('');
-    setReasoning('');
-    setClaim('');
-    setOutput('');
-  };
-
-  const loadDemo = () => {
-    setResult('試験管Aは青色に変化し、試験管Bは変化しなかった');
-    setReasoning('BTB溶液は酸性で黄色、中性で緑色、アルカリ性で青色を示す性質がある');
-    setClaim('試験管Aの溶液はアルカリ性であることが確認できた');
-    setOutput('');
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          <div className="flex items-center gap-3 mb-6">
-            <FileText className="w-8 h-8 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-gray-800">考察記入支援ツール</h1>
-          </div>
-          <p className="text-gray-600 mb-8">
-            トゥールミンモデルに基づいて考察文を生成します
-          </p>
-
-          <div className="mb-8">
-            <div className="grid grid-cols-2 gap-8 mb-4">
-              <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6">
-                <label className="block text-lg font-bold text-blue-700 mb-3">
-                  実験結果 (Data)
-                </label>
-                <textarea
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none bg-white"
-                  rows="6"
-                  placeholder="例：試験管Aは青色に変化し、試験管Bは変化しなかった"
-                  value={result}
-                  onChange={(e) => setResult(e.target.value)}
-                />
-              </div>
-
-              <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-6">
-                <label className="block text-lg font-bold text-purple-700 mb-3">
-                  主張 (Claim)
-                </label>
-                <textarea
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none resize-none bg-white"
-                  rows="6"
-                  placeholder="例：試験管Aの溶液はアルカリ性であることが確認できた"
-                  value={claim}
-                  onChange={(e) => setClaim(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* 横向き矢印：実験結果 → 主張 */}
-            <div className="absolute top-1/2 left-0 right-0 flex items-center justify-center pointer-events-none" style={{marginTop: '-60px'}}>
-              <div className="w-full max-w-6xl px-8 flex items-center justify-between">
-                <div className="flex-1"></div>
-                <svg width="80" height="40" className="text-teal-600 mx-4">
-                  <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                      <polygon points="0 0, 10 3, 0 6" fill="currentColor" />
-                    </marker>
-                  </defs>
-                  <line x1="0" y1="20" x2="70" y2="20" stroke="currentColor" strokeWidth="3" markerEnd="url(#arrowhead)" />
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考察記入支援ツール</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
+            <div class="flex items-center gap-3 mb-6">
+                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
-                <div className="flex-1"></div>
-              </div>
+                <h1 class="text-3xl font-bold text-gray-800">考察記入支援ツール</h1>
+            </div>
+            <p class="text-gray-600 mb-8">
+                トゥールミンモデルに基づいて考察文を生成します
+            </p>
+
+            <div class="relative mb-8">
+                <div class="grid grid-cols-2 gap-8 mb-4">
+                    <!-- 実験結果 -->
+                    <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-6">
+                        <label class="block text-lg font-bold text-blue-700 mb-3">
+                            実験結果 (Data)
+                        </label>
+                        <textarea
+                            id="result"
+                            class="w-full p-4 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none resize-none bg-white"
+                            rows="6"
+                            placeholder="例：試験管Aは青色に変化し、試験管Bは変化しなかった"
+                        ></textarea>
+                    </div>
+
+                    <!-- 主張 -->
+                    <div class="bg-purple-50 border-2 border-purple-300 rounded-lg p-6">
+                        <label class="block text-lg font-bold text-purple-700 mb-3">
+                            主張 (Claim)
+                        </label>
+                        <textarea
+                            id="claim"
+                            class="w-full p-4 border border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none resize-none bg-white"
+                            rows="6"
+                            placeholder="例：試験管Aの溶液はアルカリ性であることが確認できた"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- 横向き矢印 -->
+                <div class="absolute top-1/2 left-0 right-0 flex items-center justify-center pointer-events-none" style="margin-top: -60px;">
+                    <div class="w-full max-w-6xl px-8 flex items-center justify-between">
+                        <div class="flex-1"></div>
+                        <svg width="80" height="40" class="text-teal-600 mx-4">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="currentColor" />
+                                </marker>
+                            </defs>
+                            <line x1="0" y1="20" x2="70" y2="20" stroke="currentColor" stroke-width="3" marker-end="url(#arrowhead)" />
+                        </svg>
+                        <div class="flex-1"></div>
+                    </div>
+                </div>
+
+                <!-- 論拠 -->
+                <div class="w-3/4 mx-auto mt-8">
+                    <div class="bg-green-50 border-2 border-green-300 rounded-lg p-6">
+                        <label class="block text-lg font-bold text-green-700 mb-3">
+                            論拠 (Warrant)
+                        </label>
+                        <textarea
+                            id="reasoning"
+                            class="w-full p-4 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none resize-none bg-white"
+                            rows="4"
+                            placeholder="例：BTB溶液は酸性で黄色、中性で緑色、アルカリ性で青色を示す性質がある"
+                        ></textarea>
+                    </div>
+                </div>
             </div>
 
-            <div className="w-3/4 mx-auto mt-8">
-              <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6">
-                <label className="block text-lg font-bold text-green-700 mb-3">
-                  論拠 (Warrant)
-                </label>
-                <textarea
-                  className="w-full p-4 border border-gray-300 rounded-lg focus:border-green-500 focus:outline-none resize-none bg-white"
-                  rows="4"
-                  placeholder="例：BTB溶液は酸性で黄色、中性で緑色、アルカリ性で青色を示す性質がある"
-                  value={reasoning}
-                  onChange={(e) => setReasoning(e.target.value)}
-                />
-              </div>
+            <!-- ボタン -->
+            <div class="flex flex-col sm:flex-row gap-4 mt-12">
+                <button
+                    onclick="generateText()"
+                    class="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                    考察文を生成
+                </button>
+                <button
+                    onclick="loadDemo()"
+                    class="bg-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-600 transition-colors whitespace-nowrap"
+                >
+                    デモ文章
+                </button>
+                <button
+                    onclick="clearAll()"
+                    class="bg-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-400 transition-colors whitespace-nowrap"
+                >
+                    クリア
+                </button>
             </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 mt-12">
-            <button
-              onClick={generateText}
-              className="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
-            >
-              <ArrowRight className="w-5 h-5" />
-              考察文を生成
-            </button>
-            <button
-              onClick={loadDemo}
-              className="bg-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-600 transition-colors whitespace-nowrap"
-            >
-              デモ文章
-            </button>
-            <button
-              onClick={clearAll}
-              className="bg-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-400 transition-colors whitespace-nowrap"
-            >
-              クリア
-            </button>
-          </div>
         </div>
 
-        {output && (
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">生成された考察文</h2>
-            <div className="bg-gray-50 p-6 rounded-lg border-2 border-indigo-200 mb-4">
-              <p className="text-gray-800 leading-relaxed text-lg">{output}</p>
+        <!-- 出力エリア -->
+        <div id="outputArea" class="bg-white rounded-lg shadow-lg p-8" style="display: none;">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">生成された考察文</h2>
+            <div class="bg-gray-50 p-6 rounded-lg border-2 border-indigo-200 mb-4">
+                <p id="outputText" class="text-gray-800 leading-relaxed text-lg"></p>
             </div>
             <button
-              onClick={copyToClipboard}
-              className="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                onclick="copyToClipboard()"
+                class="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors"
             >
-              📋 考察文をコピー
+                📋 考察文をコピー
             </button>
-          </div>
-        )}
-      </div>
+        </div>
     </div>
-  );
-}
+
+    <script>
+        function generateText() {
+            const result = document.getElementById('result').value;
+            const reasoning = document.getElementById('reasoning').value;
+            const claim = document.getElementById('claim').value;
+
+            if (!result || !reasoning || !claim) {
+                alert('すべての項目を入力してください');
+                return;
+            }
+
+            let text = '';
+            text += result;
+            if (!result.endsWith('。')) text += '。';
+            text += reasoning;
+            if (!reasoning.endsWith('。')) text += '。';
+            text += 'したがって、' + claim;
+            if (!claim.endsWith('。')) text += '。';
+
+            document.getElementById('outputText').textContent = text;
+            document.getElementById('outputArea').style.display = 'block';
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('outputText').textContent;
+            navigator.clipboard.writeText(text);
+            alert('考察文をコピーしました！');
+        }
+
+        function clearAll() {
+            document.getElementById('result').value = '';
+            document.getElementById('reasoning').value = '';
+            document.getElementById('claim').value = '';
+            document.getElementById('outputArea').style.display = 'none';
+        }
+
+        function loadDemo() {
+            document.getElementById('result').value = '試験管Aは青色に変化し、試験管Bは変化しなかった';
+            document.getElementById('reasoning').value = 'BTB溶液は酸性で黄色、中性で緑色、アルカリ性で青色を示す性質がある';
+            document.getElementById('claim').value = '試験管Aの溶液はアルカリ性であることが確認できた';
+            document.getElementById('outputArea').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
